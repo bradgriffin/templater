@@ -1,8 +1,23 @@
 require 'test_helper'
 
 class SqlTemplateTest < ActiveSupport::TestCase
+  test "sql_template expires the cache on update" do 
+    cache_key = Object.new
+    resolver = SqlTemplate::Resolver.instance
+    details = { :formats => [:html], :locale => [:en], :handlers => [:erb] }
+
+    t = resolver.find_all("index", "users", false, details, cache_key).first
+    assert_match /Listing users/, t.source
+
+    sql_template = sql_templates(:one)
+    sql_template.update_attributes(:body => "New body for template")
+
+    t = resolver.find_all("index", "users", false, details, cache_key).first
+    assert_equal "New body for template", t.source
+  end
+
   test "resolver returns a template with the saved" do 
-  	resolver = SqlTemplate::Resolver.new
+  	resolver = SqlTemplate::Resolver.instance
   	details = { :formats => [:html], :locale => [:en], :handlers => [:erb] }
 
   	assert resolver.find_all("index", "posts", false, details).empty?
