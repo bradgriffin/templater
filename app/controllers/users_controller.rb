@@ -1,5 +1,6 @@
 class UsersController < ApplicationController
-
+  append_view_path SqlTemplate::Resolver.new
+  
   # GET /users
   # GET /users.xml
   def index
